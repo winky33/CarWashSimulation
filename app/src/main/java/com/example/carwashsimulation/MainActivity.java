@@ -1,7 +1,10 @@
 package com.example.carwashsimulation;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -10,6 +13,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -72,6 +76,10 @@ public class MainActivity extends AppCompatActivity {
                 Toast toast = Toast.makeText(getApplicationContext(), "Already in queue, please wait", Toast.LENGTH_SHORT);
                 toast.show();
             }
+        });
+
+        collectBtn.setOnClickListener(view -> {
+            showDialog(MainActivity.this);
         });
 
         queueBtn.setOnClickListener(view -> {
@@ -176,6 +184,36 @@ public class MainActivity extends AppCompatActivity {
 
         ArrayAdapter inQueueAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, inQueue);
         listView.setAdapter(inQueueAdapter);
+    }
+
+    private void showDialog(Context c) {
+        final EditText taskEditText = new EditText(c);
+        AlertDialog dialog = new AlertDialog.Builder(c)
+                .setTitle("Car Collected")
+                .setMessage("Enter your queue ticket")
+                .setView(taskEditText)
+                .setPositiveButton("Enter", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String task = String.valueOf(taskEditText.getText());
+                        boolean check = checkTicket(task);
+
+                        if((currentWash.getText().toString()).contains(task)){
+                            Toast toast = Toast.makeText(getApplicationContext(), "Your car is washing", Toast.LENGTH_SHORT);
+                            toast.show();
+                        } else if(!check){
+                            completedList.remove(task);
+                            Toast toast = Toast.makeText(getApplicationContext(), "Car successfully collected", Toast.LENGTH_SHORT);
+                            toast.show();
+                        } else{
+                            Toast toast = Toast.makeText(getApplicationContext(), "Your car is still in queue", Toast.LENGTH_SHORT);
+                            toast.show();
+                        }
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .create();
+        dialog.show();
     }
 }
 
