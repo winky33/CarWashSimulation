@@ -29,7 +29,7 @@ import java.util.TimerTask;
 public class MainActivity extends AppCompatActivity {
     Button startBtn, collectBtn,queueBtn, completeBtn;
     ListView listView;
-    TextView queueLength,currentWash,ticket_txt,listTitle;
+    TextView currentWash,ticket_txt,listTitle;
 
     QUEUE queue = new QUEUE(10);
 
@@ -51,7 +51,6 @@ public class MainActivity extends AppCompatActivity {
         completeBtn = findViewById(R.id.complete_btn);
         listView = findViewById(R.id.listView);
         ticket_txt = findViewById(R.id.checkTicket_txt);
-        queueLength = findViewById(R.id.queue_length);
         currentWash = findViewById(R.id.currentWash);
         listTitle = findViewById(R.id.listTitle);
 
@@ -128,7 +127,6 @@ public class MainActivity extends AppCompatActivity {
                 handler.post(new Runnable() {
                     public void run() {
                         String currentTitle = "Current Washing : ";
-                        String queueNoTitle = "Queue Length : ";
                         ArrayList<String> currentQueue = queue.queueList();
 
                         try{
@@ -139,7 +137,6 @@ public class MainActivity extends AppCompatActivity {
 
                             if(current!=null){
                                 currentWash.setText(currentTitle.concat(current));
-                                queueLength.setText(queueNoTitle.concat(Integer.toString(queueNo-1)));
 
                                 String completed = queue.dequeue();
                                 setInQueueAdaptor();
@@ -149,7 +146,6 @@ public class MainActivity extends AppCompatActivity {
 
                         }catch(Exception exception){
                             currentWash.setText(currentTitle.concat("none"));
-                            queueLength.setText(queueNoTitle.concat(Integer.toString(0)));
                             timer = null;
                         }
                     }
@@ -201,7 +197,7 @@ public class MainActivity extends AppCompatActivity {
                         if((currentWash.getText().toString()).contains(task)){
                             Toast toast = Toast.makeText(getApplicationContext(), "Your car is washing", Toast.LENGTH_SHORT);
                             toast.show();
-                        } else if(!check){
+                        } else if(check){
                             completedList.remove(task);
                             Toast toast = Toast.makeText(getApplicationContext(), "Car successfully collected", Toast.LENGTH_SHORT);
                             toast.show();
