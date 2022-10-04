@@ -116,41 +116,38 @@ public class MainActivity extends AppCompatActivity {
 
         washTask = new TimerTask() {
             public void run() {
-
                 //use a handler to run a toast that shows the current timestamp
                 handler.post(new Runnable() {
                     public void run() {
                         String currentTitle = "Current Washing : ";
-                        String[] currentQueue = queue.queueList();
-                        String current = currentQueue[idx];
+                        String queueNoTitle = "Queue Length : ";
+                        ArrayList<String> currentQueue = queue.queueList();
 
-                        if(current!=null){
-                            currentWash.setText(currentTitle.concat(current));
+                        try{
+                            String current = currentQueue.get(idx);
+                            int queueNo = queue.size();
 
-                            String completed = queue.dequeue();
-                            setInQueueAdaptor();
+                            Log.i("ArrayItem",current);
 
-                            completedList.add(completed);
+                            if(current!=null){
+                                currentWash.setText(currentTitle.concat(current));
+                                queueLength.setText(queueNoTitle.concat(Integer.toString(queueNo-1)));
+
+                                String completed = queue.dequeue();
+                                setInQueueAdaptor();
+
+                                completedList.add(completed);
+                            }
+
+                        }catch(Exception exception){
+                            currentWash.setText(currentTitle.concat("none"));
+                            queueLength.setText(queueNoTitle.concat(Integer.toString(0)));
+                            timer = null;
                         }
-
-                        idx++;
                     }
                 });
             }
         };
-    }
-
-    public String[] RemoveNullValue (String[] queue){
-        String[] checkNull = queue;
-        List<String> list = new ArrayList<String>();
-        for(String s : checkNull) {
-            if(s != null && s.length() > 0) {
-                list.add(s);
-            }
-        }
-        checkNull = list.toArray(new String[list.size()]);
-
-        return checkNull;
     }
 
     public String GenerateTicket(){
@@ -164,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public boolean checkTicket(String ticket){
-        String[] list = queue.queueList();
+        ArrayList<String> list = queue.queueList();
 
         for(String t : list){
             if(t == ticket){
@@ -175,9 +172,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void setInQueueAdaptor(){
-        String[] inQueue = RemoveNullValue(queue.queueList());
-
-        Log.i("QueueList", String.valueOf(inQueue[1]));
+        ArrayList<String> inQueue = queue.queueList();
 
         ArrayAdapter inQueueAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, inQueue);
         listView.setAdapter(inQueueAdapter);
@@ -186,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
 
 interface IQueuable {
     //adds value to queue and returns new queue
-    String[] enqueue(String value);
+    ArrayList<String> enqueue(String value);
 
     //removes item from queue, and returns the item removed
     String dequeue();
@@ -194,56 +189,36 @@ interface IQueuable {
     //returns the number of item in the queue
     int size();
 
-    String[] queueList();
+    ArrayList<String> queueList();
 }
 
 class QUEUE implements IQueuable{
-    String[] queue;
-    int maxsize;
+    ArrayList<String> queue;
     int size;
-    int front;
-    int rear;
 
     QUEUE(int max_size) {
-        this.queue = new String[max_size];
+        this.queue = new ArrayList<>();
         this.size = 0;
-        this.front = 0;
-        this.rear = -1;
     }
 
-    public String[] enqueue(String value){
-        if(maxsize == size){//the queue is full
-            String toast = "the queue is full";
-        }
-        if(rear == maxsize-1){
-            rear = -1;
-        }
-        queue[++rear] = value;
-        size++;
+    public ArrayList<String> enqueue(String value){
+        queue.add(value);
 
         return queue;
     }
 
     public String dequeue(){
-
-        if(size == 0){//the queue is empty
-            String toast = "the queue is empty";
-        }
-
-        String removed_item = queue[front++];
-        if(front == maxsize){
-            front = 0;
-        }
-        size--;
+        String removed_item = queue.get(0);
+        queue.remove(0);
 
         return removed_item;
     }
 
     public int size(){
-        return size;
+        return queue.size();
     }
 
-    public String[] queueList(){
+    public ArrayList<String> queueList(){
         return queue;
     }
 
