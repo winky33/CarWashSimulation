@@ -31,14 +31,14 @@ public class MainActivity extends AppCompatActivity {
     ListView listView;
     TextView currentWash,ticket_txt,listTitle;
 
-    QUEUE queue = new QUEUE(10);
+    QUEUE queue = new QUEUE();
 
     Timer timer;
     TimerTask washTask;
 
     ArrayList<String> completedList = new ArrayList<>();
     final Handler handler = new Handler();
-    int idx = 0;
+    String completed = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,7 +90,6 @@ public class MainActivity extends AppCompatActivity {
             listView.setAdapter(completedAdapter);
             listTitle.setText("PENDING TO PICKUP");
         });
-
     }
 
     @Override
@@ -109,44 +108,37 @@ public class MainActivity extends AppCompatActivity {
         initializeTimerTask();
 
         //schedule the timer, after the first 5000ms the TimerTask will run every 10000ms
-        timer.schedule(washTask, 5000, 50000);
-    }
-
-    public void stoptimertask(View v) {
-        //stop the timer, if it's not already null
-        if (timer == null) {
-            timer.cancel();
-        }
+        timer.schedule(washTask, 5000, 30000);
     }
 
     public void initializeTimerTask() {
 
         washTask = new TimerTask() {
             public void run() {
-                //use a handler to run a toast that shows the current timestamp
                 handler.post(new Runnable() {
                     public void run() {
                         String currentTitle = "Current Washing : ";
                         ArrayList<String> currentQueue = queue.queueList();
 
+                        if(completed!=null){
+                            completedList.add(completed);
+                        }
+
                         try{
-                            String current = currentQueue.get(idx);
+                            String current = currentQueue.get(0);
                             int queueNo = queue.size();
 
                             Log.i("ArrayItem",current);
 
                             if(current!=null){
                                 currentWash.setText(currentTitle.concat(current));
-
-                                String completed = queue.dequeue();
+                                completed = queue.dequeue();
                                 setInQueueAdaptor();
-
-                                completedList.add(completed);
                             }
-
                         }catch(Exception exception){
                             currentWash.setText(currentTitle.concat("none"));
-                            timer = null;
+                            completed = null;
+                            timer.cancel();
                         }
                     }
                 });
@@ -197,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
                         if((currentWash.getText().toString()).contains(task)){
                             Toast toast = Toast.makeText(getApplicationContext(), "Your car is washing", Toast.LENGTH_SHORT);
                             toast.show();
-                        } else if(check){
+                        } else if(completedList.contains(task)){
                             completedList.remove(task);
                             Toast toast = Toast.makeText(getApplicationContext(), "Car successfully collected", Toast.LENGTH_SHORT);
                             toast.show();
@@ -230,7 +222,7 @@ class QUEUE implements IQueuable{
     ArrayList<String> queue;
     int size;
 
-    QUEUE(int max_size) {
+    QUEUE() {
         this.queue = new ArrayList<>();
         this.size = 0;
     }
